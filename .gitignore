@@ -1,0 +1,7 @@
+/target
+/.vscode
+/out
+
+tracking.json
+Cargo.lock
+.env
