@@ -21,7 +21,7 @@ struct GuildTracking {
 lazy_static! {
     static ref TRACKING: HashMap<u64, GuildTracking> = {
         let tracking_json = include_str!("../tracking.json");
-        serde_json::from_str(tracking_json).expect("Invalid `tracking.json` file. Look at the README for more information on the `tracking.json` file format")
+        serde_json::from_str(tracking_json).expect("Invalid `tracking.json` file")
     };
 }
 
@@ -76,17 +76,36 @@ impl EventHandler for Handler {
                     println!("#{} is not text based", channel.name)
                 }
 
-                let print_tracking = || {
-                    print!("\r  tracking #{}", channel.name);
-                    io::stdout().flush().unwrap();
+                let print_wheel = |flush: bool, n: usize| {
+                    const WHEEL_PARTS: &[u8] = "|/-\\".as_bytes();
+
+                    print!(
+                        " {} ",
+                        WHEEL_PARTS[n % WHEEL_PARTS.len()] as char
+                    );
+
+                    if flush {
+                        io::stdout().flush().unwrap();
+                    }
                 };
 
-                print_tracking();
+                let print_tracking = |flush: bool| {
+                    print!("\x1B[2K\r");
+                    print!("  tracking #{}", channel.name);
+
+                    if flush {
+                        io::stdout().flush().unwrap();
+                    }
+                };
 
                 let mut timestamps = Vec::new();
                 let mut oldest_message = None;
 
+                let mut requests = 0;
                 loop {
+                    print_tracking(false);
+                    print_wheel(true, requests);
+
                     let messages = match oldest_message {
                         None => {
                             channel
@@ -136,6 +155,8 @@ impl EventHandler for Handler {
 
                     if last_batch {
                         break;
+                    } else {
+                        requests = requests + 1;
                     }
                 }
 

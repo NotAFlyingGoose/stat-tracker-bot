@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, path::PathBuf, path::Path, fs, io::{self, Write}};
+use std::{collections::HashMap, error::Error, path::PathBuf, path::Path, fs};
 
 use chrono::{Utc, TimeZone, Months, Local};
 use itertools::Itertools;
@@ -12,7 +12,7 @@ pub(crate) fn plot<F>(
     print_status: F
 ) -> Vec<PathBuf> 
 where
-    F: Fn()
+    F: Fn(bool)
 {
     fs::create_dir_all(&out).unwrap();
 
@@ -27,7 +27,7 @@ where
             println!("Error plotting Daily: {}", err);
             ()
         });
-    print_status();
+    print_status(true);
     plot_stat(
         &format!("{} Weekly", caption), 
         weekly, 
@@ -36,7 +36,7 @@ where
             println!("Error plotting weekly: {}", err);
             ()
         });
-    print_status();
+    print_status(true);
     
     vec![daily_file, weekly_file]
 }
@@ -118,7 +118,6 @@ fn plot_stat(
 
     root.present().expect("Unable to write result to file");
     print!("\r  saved to {}\n", out.to_str().unwrap());
-    io::stdout().flush().unwrap();
 
     Ok(())
 }
