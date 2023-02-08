@@ -30,4 +30,6 @@ Now create a `tracking.json` file with the following layout
 ```
 
 You can then use `cargo run` to run track your statistics!
-For each server, it will ask you whether or not you want to send the graph into the output channel.
+
+The graphs will be saved in an `out` folder
+and the bot will ask you whether or not you want to send them into the output channel.
